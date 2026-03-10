@@ -1,0 +1,119 @@
+{% extends 'dimensionamento/base.html' %}
+
+{% block content %}
+<section class="dashboard-header">
+    <h2>📁 Cadastro de Projetos</h2>
+    <p>Adicione configurações de cálculo para seus projetos.</p>
+</section>
+
+<div class="card" style="margin-bottom: 2rem; border-left: 4px solid #2563eb;">
+    <h3>➕ Novo Projeto</h3>
+    <form id="form-novo-projeto" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="grid-column: 1 / -1;">
+            <label>Nome do Projeto:</label><br>
+            <input type="text" id="nome_projeto" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+        </div>
+        <div>
+            <label>Classe de Carregamento:</label><br>
+            <select id="classe_carregamento" class="form-input" required>
+                <option value="permanente">Permanente</option>
+                <option value="longa">Longa Duração</option>
+                <option value="media">Média Duração</option>
+                <option value="curta">Curta Duração</option>
+                <option value="instantanea">Instantânea</option>
+            </select>
+        </div>
+        <div>
+            <label>Classe de Umidade:</label><br>
+            <select id="classe_umidade" class="form-input" required>
+                <option value="1">Classe 1 (≤ 12%)</option>
+                <option value="2">Classe 2 (15%)</option>
+                <option value="3">Classe 3 (18%)</option>
+                <option value="4">Classe 4 (≥ 21%)</option>
+            </select>
+        </div>
+        <div>
+            <label>Categoria da Madeira:</label><br>
+            <select id="categoria_madeira" class="form-input" required>
+                <option value="1">Categoria 1</option>
+                <option value="2">Categoria 2</option>
+                <option value="3">Categoria 3</option>
+            </select>
+        </div>
+        <div style="grid-column: 1 / -1; margin-top: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Salvar Projeto</button>
+        </div>
+    </form>
+</div>
+
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2rem 0;">
+
+<section class="cards-grid" id="container-projetos">
+    <p>Buscando projetos...</p>
+</section>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function carregarProjetos() {
+        
+        fetch('/api/projetos/') 
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('container-projetos');
+                if (data.length === 0) {
+                    container.innerHTML = '<p>Nenhum projeto encontrado.</p>';
+                    return;
+                }
+                container.innerHTML = data.map(p => `
+                    <div class="card">
+                        <h3>${p.nome}</h3>
+                        <p><small>ID: ${p.id}</small></p>
+                        <p><strong>Carregamento:</strong> ${p.classe_carregamento}</p>
+                    </div>
+                `).join('');
+            })
+            .catch(err => console.error("Erro ao carregar projetos:", err));
+    }
+
+    document.getElementById('form-novo-projeto').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const dados = {
+            nome: document.getElementById('nome_projeto').value,
+            classe_carregamento: document.getElementById('classe_carregamento').value,
+            classe_umidade: document.getElementById('classe_umidade').value,
+            categoria_madeira: document.getElementById('categoria_madeira').value
+        };
+
+        
+        fetch('/api/projetos/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify(dados)
+        }).then(res => {
+            if (res.ok) {
+                alert("Salvo!");
+                carregarProjetos();
+                this.reset();
+            } else {
+                alert("Erro ao salvar o projeto.");
+            }
+        });
+    });
+
+    carregarProjetos();
+</script>
+{% endblock %}

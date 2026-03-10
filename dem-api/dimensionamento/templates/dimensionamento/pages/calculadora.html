@@ -1,0 +1,342 @@
+{% extends 'dimensionamento/base.html' %}
+
+{% block content %}
+<section class="dashboard-header">
+    <h2>📐 Calculadora Estrutural</h2>
+    <p>Verificação de peças e ligações segundo a NBR 7190.</p>
+</section>
+
+
+<div class="tabs">
+    <button class="tab-button active" onclick="openTab(event, 'Pecas')">Peças (Tração/Compressão)</button>
+    <button class="tab-button" onclick="openTab(event, 'Pinos')">Ligações por Pinos</button>
+    <button class="tab-button" onclick="openTab(event, 'Entalhes')">Ligações por Entalhes</button>
+</div>
+
+
+<div id="Pecas" class="tab-content" style="display: block;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        <div class="card">
+            <h3>Dados da Peça e Solicitação</h3>
+            <form id="form-calculo-peca" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label>Força Solicitante N<sub>d</sub> (kN):</label><br>
+                        <input type="number" id="nd" class="form-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Tipo de Esforço:</label><br>
+                        <select id="tipo_esforco" class="form-input">
+                            <option value="tracao">Tração Paralela</option>
+                            <option value="compressao">Compressão Paralela</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label>Base b (cm):</label><br>
+                        <input type="number" id="base" class="form-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Altura h (cm):</label><br>
+                        <input type="number" id="altura" class="form-input" required>
+                    </div>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+                <div>
+                    <label>Espécie da Madeira:</label><br>
+                    <select id="select_madeira_peca" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Projeto:</label><br>
+                    <select id="select_projeto_peca" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="calcularPeca()">Executar Verificação</button>
+            </form>
+        </div>
+        <div class="card" id="card-resultado-peca" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #f8fafc; text-align: center;">
+            <div style="color: var(--text-muted); padding: 2rem;">
+                <h3>Resultados da Análise</h3>
+                <p>Selecione os dados para processar.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="Pinos" class="tab-content">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        <div class="card">
+            <h3>Dados da Ligação por Pino</h3>
+            <form id="form-calculo-pino" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                <div>
+                    <label>Força Cortante V<sub>d</sub> (kN):</label><br>
+                    <input type="number" id="pino_vd" class="form-input" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label>Diâmetro do Pino d (cm):</label><br>
+                        <input type="number" id="pino_d" class="form-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Espessura da Peça t1 (cm):</label><br>
+                        <input type="number" id="pino_t1" class="form-input" required>
+                    </div>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+                <div>
+                    <label>Espécie da Madeira:</label><br>
+                    <select id="select_madeira_pino" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Projeto:</label><br>
+                    <select id="select_projeto_pino" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="calcularPino()">Verificar Ligação</button>
+            </form>
+        </div>
+        <div class="card" id="card-resultado-pino" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #f8fafc; text-align: center;">
+            <div style="color: var(--text-muted); padding: 2rem;">
+                <h3>Resultados da Análise</h3>
+                <p>Selecione os dados para processar.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="Entalhes" class="tab-content">
+     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        <div class="card">
+            <h3>Dados da Ligação por Entalhe</h3>
+            <form id="form-calculo-entalhe" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                <div>
+                    <label>Força Cortante V<sub>d</sub> (kN):</label><br>
+                    <input type="number" id="entalhe_vd" class="form-input" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label>Comprimento do Corte l<sub>c</sub> (cm):</label><br>
+                        <input type="number" id="entalhe_lc" class="form-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Largura do Entalhe b<sub>e</sub> (cm):</label><br>
+                        <input type="number" id="entalhe_be" class="form-input" required>
+                    </div>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+                <div>
+                    <label>Espécie da Madeira:</label><br>
+                    <select id="select_madeira_entalhe" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Projeto:</label><br>
+                    <select id="select_projeto_entalhe" class="form-input" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="calcularEntalhe()">Verificar Ligação</button>
+            </form>
+        </div>
+        <div class="card" id="card-resultado-entalhe" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #f8fafc; text-align: center;">
+            <div style="color: var(--text-muted); padding: 2rem;">
+                <h3>Resultados da Análise</h3>
+                <p>Selecione os dados para processar.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tab-content { display: none; margin-top: 1rem; }
+    .tabs { margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; }
+    .tab-button { background: none; border: none; padding: 1rem; font-size: 1rem; cursor: pointer; }
+    .tab-button.active { border-bottom: 2px solid #2563eb; font-weight: bold; color: #2563eb; }
+</style>
+
+<script>
+   
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function carregarOpcoes(selectId, url, nomeCampo) {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById(selectId);
+                if (data.length > 0) {
+                    select.innerHTML = data.map(item => `<option value="${item.id}">${item[nomeCampo]}</option>`).join('');
+                } else {
+                    select.innerHTML = `<option value="">Nenhum item encontrado</option>`;
+                }
+            })
+            .catch(error => {
+                console.error(`Erro ao carregar ${selectId}:`, error);
+                const select = document.getElementById(selectId);
+                select.innerHTML = `<option value="">Erro ao carregar</option>`;
+            });
+    }
+
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        ['peca', 'pino', 'entalhe'].forEach(prefixo => {
+            carregarOpcoes(`select_madeira_${prefixo}`, '/api/madeiras/', 'nome');
+            
+            carregarOpcoes(`select_projeto_${prefixo}`, '/api/projetos/', 'nome');
+        });
+    });
+
+
+   
+
+    
+    function calcularPeca() {
+        const madeiraId = document.getElementById('select_madeira_peca').value;
+        const projetoId = document.getElementById('select_projeto_peca').value;
+
+        
+        if (!madeiraId || !projetoId) {
+            alert("Por favor, selecione uma madeira e um projeto antes de calcular.");
+            return;
+        }
+
+        const dados = {
+            forca_solicitante_nd: document.getElementById('nd').value,
+            base_b: document.getElementById('base').value,
+            altura_h: document.getElementById('altura').value,
+            tipo_esforco: document.getElementById('tipo_esforco').value,
+            madeira: madeiraId,
+            projeto: projetoId,
+        };
+
+        fetch('/api/pecas/calcular/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify(dados)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.error) return alert(res.error);
+            const cor = res.status === 'APROVADO' ? '#16a34a' : '#dc2626';
+            document.getElementById('card-resultado-peca').innerHTML = `
+                <h3 style="color: ${cor}">${res.status}</h3>
+                <div style="text-align: left; background: white; padding: 1rem; border-radius: 8px; width: 90%;">
+                    <p><strong>Resistência (f<sub>d</sub>):</strong> ${res.fd} MPa</p>
+                    <p><strong>Tensão (&sigma;<sub>d</sub>):</strong> ${res.sigma_d} MPa</p>
+                </div>`;
+        });
+    }
+
+    
+    function calcularPino() {
+        const madeiraId = document.getElementById('select_madeira_pino').value;
+        const projetoId = document.getElementById('select_projeto_pino').value;
+
+        if (!madeiraId || !projetoId) {
+            alert("Por favor, selecione uma madeira e um projeto antes de calcular.");
+            return;
+        }
+
+        const dados = {
+            forca_cortante_vd: document.getElementById('pino_vd').value,
+            diametro_pino: document.getElementById('pino_d').value,
+            espessura_t1: document.getElementById('pino_t1').value,
+            madeira: madeiraId,
+            projeto: projetoId,
+        };
+
+        fetch('/api/ligacoes/verificar-pino/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify(dados)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.error) return alert(res.error);
+            const cor = res.status === 'APROVADO' ? '#16a34a' : '#dc2626';
+            document.getElementById('card-resultado-pino').innerHTML = `
+                <h3 style="color: ${cor}">${res.status}</h3>
+                <div style="text-align: left; background: white; padding: 1rem; border-radius: 8px; width: 90%;">
+                    <p><strong>Resistência (R<sub>d</sub>):</strong> ${res.resistencia_calculo_rd_kn} kN</p>
+                    <p><strong>Solicitante (V<sub>d</sub>):</strong> ${res.forca_solicitante_vd_kn} kN</p>
+                    <hr>
+                    <p><small>Resist. Embutimento (f<sub>e,d</sub>): ${res.resistencia_embutimento_fed_mpa} MPa</small></p>
+                </div>`;
+        });
+    }
+
+    
+    function calcularEntalhe() {
+        const madeiraId = document.getElementById('select_madeira_entalhe').value;
+        const projetoId = document.getElementById('select_projeto_entalhe').value;
+
+        if (!madeiraId || !projetoId) {
+            alert("Por favor, selecione uma madeira e um projeto antes de calcular.");
+            return;
+        }
+
+        const dados = {
+            forca_cortante_vd: document.getElementById('entalhe_vd').value,
+            comprimento_corte_entalhe: document.getElementById('entalhe_lc').value,
+            largura_entalhe_be: document.getElementById('entalhe_be').value,
+            madeira: madeiraId,
+            projeto: projetoId,
+        };
+
+        fetch('/api/ligacoes/verificar-entalhe/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify(dados)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.error) return alert(res.error);
+            const cor = res.status === 'APROVADO' ? '#16a34a' : '#dc2626';
+            document.getElementById('card-resultado-entalhe').innerHTML = `
+                <h3 style="color: ${cor}">${res.status}</h3>
+                <div style="text-align: left; background: white; padding: 1rem; border-radius: 8px; width: 90%;">
+                    <p><strong>Resistência (&tau;<sub>d</sub>):</strong> ${res.resistencia_cisalhamento_fvd_mpa} MPa</p>
+                    <p><strong>Tensão Solicitante (&tau;<sub>V,d</sub>):</strong> ${res.tensao_solicitante_tau_vd_mpa} MPa</p>
+                </div>`;
+        });
+    }
+</script>
+{% endblock %}

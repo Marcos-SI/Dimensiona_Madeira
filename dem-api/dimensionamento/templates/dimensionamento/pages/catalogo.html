@@ -1,0 +1,143 @@
+{% extends 'dimensionamento/base.html' %}
+
+{% block content %}
+<section class="dashboard-header">
+    <h2>🪵 Catálogo de Madeiras</h2>
+    <p>Gerencie as propriedades mecânicas das espécies conforme a NBR 7190.</p>
+</section>
+
+<div class="card" style="margin-bottom: 2rem; border-left: 4px solid #2563eb;">
+    <h3>➕ Cadastrar Nova Espécie</h3>
+    <form id="form-nova-madeira" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        
+    <div style="grid-column: 1 / -1;">
+        <label>Nome da Espécie (Ex: Pinus Taeda):</label><br>
+        <input type="text" id="nome_madeira" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+
+    <div>
+        <label>Compressão f<sub>c0,k</sub> (MPa):</label><br>
+        <input type="number" step="0.1" id="fc0k" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+    <div>
+        <label>Tração f<sub>t0,k</sub> (MPa):</label><br>
+        <input type="number" step="0.1" id="ft0k" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+    <div>
+        <label>Cisalhamento f<sub>v0,k</sub> (MPa):</label><br>
+        <input type="number" step="0.1" id="fv0k" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+    <div>
+        <label>Comp. Normal f<sub>c90,k</sub> (MPa):</label><br>
+        <input type="number" step="0.1" id="fc90k" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+    <div>
+        <label>Módulo de Elast. E<sub>c0,m</sub> (MPa):</label><br>
+        <input type="number" step="0.1" id="ec0m" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+    <div>
+        <label>Densidade &rho;<sub>ap</sub> (kg/m³):</label><br>
+        <input type="number" step="0.1" id="densidade" class="form-input" style="width: 100%; padding: 0.5rem;" required>
+    </div>
+
+    <div style="grid-column: 1 / -1; margin-top: 0.5rem;">
+        <button type="submit" class="btn btn-primary">Salvar no Banco de Dados</button>
+    </div>
+</form>
+</div>
+
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2rem 0;">
+
+<section class="cards-grid" id="container-madeiras">
+    <p>Carregando propriedades do banco de dados...</p>
+</section>
+
+<script>
+    
+    function carregarMadeiras() {
+        fetch('/api/madeiras/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('container-madeiras');
+                container.innerHTML = ''; 
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted);">Nenhuma madeira cadastrada. Use o formulário acima para adicionar a primeira!</p>';
+                    return;
+                }
+
+                data.forEach(madeira => {
+                    const card = `
+                        <div class="card">
+                            <h3>${madeira.nome}</h3>
+                            <p><strong>Compressão ($f_{c0,k}$):</strong> ${madeira.f_c0k} MPa</p>
+                            <p><strong>Tração ($f_{t0,k}$):</strong> ${madeira.f_t0k} MPa</p>
+                            <p><strong>Cisalhamento ($f_{v0,k}$):</strong> ${madeira.f_v0k} MPa</p>
+                            <p><strong>Elasticidade ($E_{c0,m}$):</strong> ${madeira.e_c0m} MPa</p>
+                            <p><strong>Densidade:</strong> ${madeira.densidade_aparente} kg/m³</p>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            })
+            .catch(error => console.error('Erro ao buscar as madeiras:', error));
+    }
+
+    
+    carregarMadeiras();
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+   
+    document.getElementById('form-nova-madeira').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        
+        const novaMadeira = {
+            nome: document.getElementById('nome_madeira').value,
+            f_c0k: document.getElementById('fc0k').value,
+            f_t0k: document.getElementById('ft0k').value,
+            f_v0k: document.getElementById('fv0k').value,
+            f_c90k: document.getElementById('fc90k').value,
+            e_c0m: document.getElementById('ec0m').value,
+            densidade_aparente: document.getElementById('densidade').value
+        };
+
+        const csrftoken = getCookie('csrftoken');
+
+       
+        fetch('/api/madeiras/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken 
+            },
+            body: JSON.stringify(novaMadeira) 
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Madeira cadastrada com sucesso!");
+                document.getElementById('form-nova-madeira').reset(); 
+                carregarMadeiras(); 
+            } else {
+                alert("Erro ao cadastrar a madeira. Verifique os dados.");
+            }
+        })
+        .catch(error => console.error('Erro ao enviar dados:', error));
+    });
+</script>
+{% endblock %}

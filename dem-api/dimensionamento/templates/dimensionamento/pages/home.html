@@ -1,0 +1,28 @@
+{% extends 'dimensionamento/base.html' %}
+
+{% block content %}
+<section class="dashboard-header">
+    <h2>Visão Geral</h2>
+    <p>Bem-vindo ao sistema de dimensionamento segundo a NBR 7190.</p>
+</section>
+
+<section class="cards-grid">
+    <div class="card">
+        <h3>Novo Projeto</h3>
+        <p>Inicie um novo cálculo definindo classe de umidade, carregamento e madeira.</p>
+        <a href="{% url 'projeto' %}" class="btn btn-primary">Começar Dimensionamento</a>
+    </div>
+
+    <div class="card">
+        <h3>Verificar Peças</h3>
+        <p>Calcule tração, compressão e flambagem em peças estruturais.</p>
+        <a href="{% url 'calculadora' %}" class="btn btn-secondary">Acessar Calculadora</a>
+    </div>
+
+    <div class="card">
+        <h3>Propriedades (Madeiras)</h3>
+        <p>Consulte ou adicione novas espécies como Pinus e Jatobá ao banco.</p>
+        <a href="{% url 'catalogo' %}" class="btn btn-secondary">Ver Catálogo</a>
+    </div>
+</section>
+{% endblock %}
