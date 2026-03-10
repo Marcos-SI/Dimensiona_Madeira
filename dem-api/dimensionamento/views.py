@@ -75,22 +75,22 @@ class PecaDimensionadaViewSet(viewsets.ModelViewSet):
             status = "APROVADO" if sigma_d <= fd else "REPROVADO"
 
             
-            peca = PecaDimensionada.objects.create(
-                projeto=projeto,
-                madeira=madeira,
-                identificacao=data.get('identificacao', 'Peça Avulsa'),
-                tipo_esforco=tipo_esforco,
-                base_b=base,
-                altura_h=altura,
-                forca_solicitante_nd=nd
-            )
+            # peca = PecaDimensionada.objects.create(
+            #     projeto=projeto,
+            #     madeira=madeira,
+            #     identificacao=data.get('identificacao', 'Peça Avulsa'),
+            #     tipo_esforco=tipo_esforco,
+            #     base_b=base,
+            #     altura_h=altura,
+            #     forca_solicitante_nd=nd
+            # )
 
             return Response({
                 'status': status,
                 'fd': round(fd, 2),
                 'sigma_d': round(sigma_d, 2),
                 'kmod': round(kmod_total, 2),
-                'peca_id': peca.id
+                #'peca_id': peca.id
             })
 
         except Exception as e:
