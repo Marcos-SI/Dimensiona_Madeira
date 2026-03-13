@@ -7,11 +7,13 @@ from django.db import models
 class Madeira(models.Model):
     nome = models.CharField('Nome da Espécie (ex: Pinus Taeda)', max_length=100, unique=True)
     f_c0k = models.FloatField('Compressão Paralela (fc0,k) [MPa]')
-    f_t0k = models.FloatField('Tração Paralela (ft0,k) [MPa]')
+    f_t0k = models.FloatField('Tração Paralela (ftn,k) [MPa]')
     f_v0k = models.FloatField('Cisalhamento (fv0,k) [MPa]')
-    f_c90k = models.FloatField('Compressão Normal (fc90,k) [MPa]') 
-    e_c0m = models.FloatField('Módulo de Elasticidade (Ec0,m) [MPa]')
-    densidade_aparente = models.FloatField('Densidade (ρap) [kg/m³]')
+    f_fe = models.FloatField('Embutimento (fe)')
+    f_c90k = models.FloatField('Compressão Normal (fcn,k) [MPa]') 
+    e_c0m = models.FloatField('Módulo de Elasticidade (Ecn0,m) [MPa]')
+    f_fd = models.FloatField('Flexão')
+    # densidade_aparente = models.FloatField('Densidade (ρap) [kg/m³]')
 
     class Meta:
         verbose_name = 'Madeira'

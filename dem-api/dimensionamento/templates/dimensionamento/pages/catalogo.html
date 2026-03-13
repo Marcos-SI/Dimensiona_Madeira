@@ -3,9 +3,10 @@
 {% block content %}
 <section class="dashboard-header">
     <h2>🪵 Catálogo de Madeiras</h2>
-    <p>Gerencie as propriedades mecânicas das espécies conforme a NBR 7190.</p>
+    <p>Propriedades mecânicas das espécies disponíveis no sistema, conforme a NBR 7190.</p>
 </section>
 
+{% comment %}
 <div class="card" style="margin-bottom: 2rem; border-left: 4px solid #2563eb;">
     <h3>➕ Cadastrar Nova Espécie</h3>
     <form id="form-nova-madeira" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
@@ -45,6 +46,7 @@
     </div>
 </form>
 </div>
+{% endcomment %}
 
 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2rem 0;">
 
@@ -62,7 +64,7 @@
                 container.innerHTML = ''; 
 
                 if (data.length === 0) {
-                    container.innerHTML = '<p style="color: var(--text-muted);">Nenhuma madeira cadastrada. Use o formulário acima para adicionar a primeira!</p>';
+                    container.innerHTML = '<p style="color: var(--text-muted);">Nenhuma madeira cadastrada. Rode o script de povoamento (seed.py) para carregar os dados iniciais.</p>';
                     return;
                 }
 
@@ -70,11 +72,14 @@
                     const card = `
                         <div class="card">
                             <h3>${madeira.nome}</h3>
-                            <p><strong>Compressão ($f_{c0,k}$):</strong> ${madeira.f_c0k} MPa</p>
-                            <p><strong>Tração ($f_{t0,k}$):</strong> ${madeira.f_t0k} MPa</p>
-                            <p><strong>Cisalhamento ($f_{v0,k}$):</strong> ${madeira.f_v0k} MPa</p>
-                            <p><strong>Elasticidade ($E_{c0,m}$):</strong> ${madeira.e_c0m} MPa</p>
-                            <p><strong>Densidade:</strong> ${madeira.densidade_aparente} kg/m³</p>
+                            <p><strong>Resistência à Compressão Paralela($f_{c0,k}$):</strong> ${madeira.f_c0k} MPa</p>
+                            <p><strong>Resistência à Tração ($f_{t0,k}$):</strong> ${madeira.f_t0k} MPa</p>
+                            <p><strong>Resistência ao Cisalhamento ($f_{v0,k}$):</strong> ${madeira.f_v0k} MPa</p>
+                            <p><strong>Resistência à Comp. Normal ($f_{c90,k}$):</strong> ${madeira.f_c90k} MPa</p>
+                            <p><strong>Resitencia do modulo de Elasticidade ($E_{c0,m}$):</strong> ${madeira.e_c0m} MPa</p>
+                            <p><strong>Resistência ao Embutimento ($E_{c0,m}$):</strong> ${madeira. f_fe} MPa</p>
+                            <p><strong>Resitencia a Flexão ($E_{c0,m}$):</strong> ${madeira.f_fd} MPa</p>
+                            
                         </div>
                     `;
                     container.innerHTML += card;
@@ -86,7 +91,7 @@
     
     carregarMadeiras();
 
-
+    /*
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -139,5 +144,6 @@
         })
         .catch(error => console.error('Erro ao enviar dados:', error));
     });
+    */
 </script>
 {% endblock %}

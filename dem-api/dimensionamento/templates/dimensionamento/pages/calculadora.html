@@ -21,8 +21,10 @@
             <form id="form-calculo-peca" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
                 <div style="display: flex; gap: 1rem;">
                     <div style="flex: 1;">
-                        <label>Força Solicitante N<sub>d</sub> (kN):</label><br>
-                        <input type="number" id="nd" class="form-input" required>
+                        <!-- INÍCIO DA MODIFICAÇÃO 1: HTML -->
+                        <label>Força Característica N<sub>k</sub> (kN):</label><br>
+                        <input type="number" id="nk" class="form-input" required>
+                        <!-- FIM DA MODIFICAÇÃO 1: HTML -->
                     </div>
                     <div style="flex: 1;">
                         <label>Tipo de Esforço:</label><br>
@@ -238,14 +240,16 @@
             return;
         }
 
+        // --- INÍCIO DA MODIFICAÇÃO 2: JavaScript ---
         const dados = {
-            forca_solicitante_nd: document.getElementById('nd').value,
+            forca_solicitante_nk: document.getElementById('nk').value, // Chave e ID atualizados
             base_b: document.getElementById('base').value,
             altura_h: document.getElementById('altura').value,
             tipo_esforco: document.getElementById('tipo_esforco').value,
             madeira: madeiraId,
             projeto: projetoId,
         };
+        // --- FIM DA MODIFICAÇÃO 2: JavaScript ---
 
         fetch('/api/pecas/calcular/', {
             method: 'POST',
@@ -295,7 +299,7 @@
             document.getElementById('card-resultado-pino').innerHTML = `
                 <h3 style="color: ${cor}">${res.status}</h3>
                 <div style="text-align: left; background: white; padding: 1rem; border-radius: 8px; width: 90%;">
-                    <p><strong>Resistência (R<sub>d</sub>):</strong> ${res.resistencia_calculo_rd_kn} kN</p>
+                    <p><strong>Resistência (R<sub>d</sub>):</strong> ${res.resistencia_rd_kn} kN</p>
                     <p><strong>Solicitante (V<sub>d</sub>):</strong> ${res.forca_solicitante_vd_kn} kN</p>
                     <hr>
                     <p><small>Resist. Embutimento (f<sub>e,d</sub>): ${res.resistencia_embutimento_fed_mpa} MPa</small></p>
