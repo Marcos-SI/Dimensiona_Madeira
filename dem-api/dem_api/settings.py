@@ -80,9 +80,11 @@ WSGI_APPLICATION = 'dem_api.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        # Mantenha o SQLite como padrão para desenvolvimento local
+        # Usa a URL do banco de dados da variável de ambiente DATABASE_URL se ela existir,
+        # caso contrário, usa o SQLite como padrão para desenvolvimento local.
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
+        conn_max_age=600,
+        ssl_require='RENDER' in os.environ # Exige SSL apenas quando em produção no Render
     )
 }
 
